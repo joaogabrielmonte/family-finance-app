@@ -1,0 +1,12 @@
+-- CreateTable
+CREATE TABLE "Goal" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "targetAmount" REAL NOT NULL,
+    "currentAmount" REAL NOT NULL DEFAULT 0,
+    "deadline" DATETIME,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Goal_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

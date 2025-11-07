@@ -1,0 +1,128 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  finances      Finance[]
+  banks         Bank[]
+  goals         Goal[]
+  Event         Event[]
+  FamilyMember  FamilyMember[] @relation("UserFamilyMembers")
+  family        Family?        @relation("UserFamily", fields: [familyId], references: [id])
+  familyId      Int? // ligação ao grupo familiar atual
+  ownedFamilies Family[]       @relation("FamilyOwner")
+}
+
+model Bank {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  name        String
+  accountType String?
+  balance     Float    @default(0.0)
+  logo        String? // Adicione esta linha
+  createdAt   DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  finances Finance[]
+
+  @@index([userId])
+}
+
+model Finance {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  bankId      Int? // agora opcional, pode ser null
+  description String
+  amount      Float
+  type        String // 'entrada' ou 'saida'
+  date        DateTime @default(now())
+
+  User     User          @relation(fields: [userId], references: [id])
+  Bank     Bank?         @relation(fields: [bankId], references: [id])
+  memberId Int? // vincula a transação a um FamilyMember
+  member   FamilyMember? @relation(fields: [memberId], references: [id])
+
+  @@index([userId])
+  @@index([bankId])
+}
+
+model Menu {
+  id         Int     @id @default(autoincrement())
+  name       String
+  icon       String?
+  path       String?
+  role       String? // ex: 'admin', 'user' ou null (para todos)
+  orderIndex Int     @default(0)
+  isActive   Boolean @default(true)
+  parentId   Int?
+  parent     Menu?   @relation("SubMenus", fields: [parentId], references: [id])
+  submenus   Menu[]  @relation("SubMenus")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Goal {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  title         String
+  targetAmount  Float
+  currentAmount Float     @default(0)
+  deadline      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // relação com usuário
+  User User @relation(fields: [userId], references: [id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  amount      Float? // opcional, se quiser associar valor
+  type        String? // 'receita' ou 'despesa'
+  date        DateTime
+  notified    Boolean  @default(false) // se a notificação já foi enviada
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Family {
+  id        Int            @id @default(autoincrement())
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  ownerId   Int // usuário criador
+  owner     User           @relation("FamilyOwner", fields: [ownerId], references: [id])
+  members   FamilyMember[]
+  users     User[]         @relation("UserFamily") // usuários vinculados a essa família (para o futuro)
+}
+
+model FamilyMember {
+  id             Int       @id @default(autoincrement())
+  familyId       Int
+  userId         Int? // opcional, membro pode ser convidado externo
+  name           String
+  role           String    @default("viewer")
+  avatar         String?
+  partialBalance Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  family         Family    @relation(fields: [familyId], references: [id])
+  User           User?     @relation("UserFamilyMembers", fields: [userId], references: [id])
+  Finance        Finance[]
+}
