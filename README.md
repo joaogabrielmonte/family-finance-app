@@ -22,12 +22,12 @@ cd backend
 Instale as dependências:
 
 bash
-Copiar código
+
 npm install
 Configure as variáveis de ambiente criando um arquivo .env na raiz do backend:
 
 env
-Copiar código
+
 DATABASE_URL=postgresql://usuario:senha@host:porta/nome_da_base
 PORT=3333
 Se quiser testar sem criar uma nova base, você pode usar a base local SQLite ou a que já existe.
@@ -35,7 +35,7 @@ Se quiser testar sem criar uma nova base, você pode usar a base local SQLite ou
 Rode o servidor:
 
 bash
-Copiar código
+
 node src/server.js
 O backend estará rodando em http://localhost:3333.
 
@@ -43,12 +43,12 @@ O backend estará rodando em http://localhost:3333.
 Acesse a pasta do frontend:
 
 bash
-Copiar código
+
 cd frontend
 Instale as dependências:
 
 bash
-Copiar código
+
 npm install
 Rode o frontend:
 
