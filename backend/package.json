@@ -2,9 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "api/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node api/server.js",
+    "build": "npx prisma generate",
+    "vercel-build": "npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -13,9 +15,7 @@
     "dayjs": "^1.11.19",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.18.0"
-  },
-  "devDependencies": {
+    "prisma": "^6.18.0",
     "dotenv": "^17.2.3"
   },
   "prisma": {
