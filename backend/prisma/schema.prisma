@@ -1,10 +1,11 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -13,63 +14,60 @@ model User {
   email         String         @unique
   password      String
   role          String         @default("user")
-  finances      Finance[]
+  familyId      Int?
   banks         Bank[]
-  goals         Goal[]
   Event         Event[]
-  FamilyMember  FamilyMember[] @relation("UserFamilyMembers")
-  family        Family?        @relation("UserFamily", fields: [familyId], references: [id])
-  familyId      Int? // ligação ao grupo familiar atual
   ownedFamilies Family[]       @relation("FamilyOwner")
+  FamilyMember  FamilyMember[] @relation("UserFamilyMembers")
+  finances      Finance[]
+  goals         Goal[]
+  family        Family?        @relation("UserFamily", fields: [familyId], references: [id])
 }
 
 model Bank {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
   name        String
   accountType String?
-  balance     Float    @default(0.0)
-  logo        String? // Adicione esta linha
-  createdAt   DateTime @default(now())
-
-  user     User      @relation(fields: [userId], references: [id])
-  finances Finance[]
+  balance     Float     @default(0.0)
+  logo        String?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+  finances    Finance[]
 
   @@index([userId])
 }
 
 model Finance {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   userId      Int
-  bankId      Int? // agora opcional, pode ser null
+  bankId      Int?
   description String
   amount      Float
-  type        String // 'entrada' ou 'saida'
-  date        DateTime @default(now())
-
-  User     User          @relation(fields: [userId], references: [id])
-  Bank     Bank?         @relation(fields: [bankId], references: [id])
-  memberId Int? // vincula a transação a um FamilyMember
-  member   FamilyMember? @relation(fields: [memberId], references: [id])
+  type        String
+  date        DateTime      @default(now())
+  memberId    Int?
+  Bank        Bank?         @relation(fields: [bankId], references: [id])
+  member      FamilyMember? @relation(fields: [memberId], references: [id])
+  User        User          @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([bankId])
 }
 
 model Menu {
-  id         Int     @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   name       String
   icon       String?
   path       String?
-  role       String? // ex: 'admin', 'user' ou null (para todos)
-  orderIndex Int     @default(0)
-  isActive   Boolean @default(true)
+  role       String?
+  orderIndex Int      @default(0)
+  isActive   Boolean  @default(true)
   parentId   Int?
-  parent     Menu?   @relation("SubMenus", fields: [parentId], references: [id])
-  submenus   Menu[]  @relation("SubMenus")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  parent     Menu?    @relation("SubMenus", fields: [parentId], references: [id])
+  submenus   Menu[]   @relation("SubMenus")
 }
 
 model Goal {
@@ -81,9 +79,7 @@ model Goal {
   deadline      DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  // relação com usuário
-  User User @relation(fields: [userId], references: [id])
+  User          User      @relation(fields: [userId], references: [id])
 }
 
 model Event {
@@ -91,12 +87,11 @@ model Event {
   userId      Int
   title       String
   description String?
-  amount      Float? // opcional, se quiser associar valor
-  type        String? // 'receita' ou 'despesa'
+  amount      Float?
+  type        String?
   date        DateTime
-  notified    Boolean  @default(false) // se a notificação já foi enviada
-
-  user User @relation(fields: [userId], references: [id])
+  notified    Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
@@ -106,16 +101,16 @@ model Family {
   name      String
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  ownerId   Int // usuário criador
+  ownerId   Int
   owner     User           @relation("FamilyOwner", fields: [ownerId], references: [id])
   members   FamilyMember[]
-  users     User[]         @relation("UserFamily") // usuários vinculados a essa família (para o futuro)
+  users     User[]         @relation("UserFamily")
 }
 
 model FamilyMember {
   id             Int       @id @default(autoincrement())
   familyId       Int
-  userId         Int? // opcional, membro pode ser convidado externo
+  userId         Int?
   name           String
   role           String    @default("viewer")
   avatar         String?
