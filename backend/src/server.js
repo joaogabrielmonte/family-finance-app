@@ -15,7 +15,15 @@ import FamilyMembers from './routes/family.js';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://family-finance-lyart.vercel.app", // frontend (Vercel)
+    "http://localhost:3000"                    // ambiente local
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Montando as rotas
