@@ -13,6 +13,7 @@ export default function Menus() {
   const [icon, setIcon] = useState("");
   const [parentId, setParentId] = useState(null);
   const [isActive, setIsActive] = useState(true);
+  const [role, setRole] = useState(""); // 🔹 novo campo
   const [editingId, setEditingId] = useState(null);
 
   // Função para pegar componente do ícone
@@ -39,6 +40,7 @@ export default function Menus() {
     setIcon("");
     setParentId(null);
     setIsActive(true);
+    setRole(""); // 🔹 reset do role
     setEditingId(null);
   };
 
@@ -54,6 +56,7 @@ export default function Menus() {
       icon: icon || null,
       parentId: parentId ?? null,
       isActive,
+      role: role || null, // 🔹 incluído role
     };
 
     try {
@@ -78,6 +81,7 @@ export default function Menus() {
     setIcon(menu.icon || "");
     setParentId(menu.parentId);
     setIsActive(menu.isActive);
+    setRole(menu.role || ""); // 🔹 preencher role ao editar
     setEditingId(menu.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -123,6 +127,11 @@ export default function Menus() {
                 <strong className="text-gray-800">{menu.name}</strong>
                 {menu.path && (
                   <span className="text-gray-500 ml-2 text-sm">{menu.path}</span>
+                )}
+                {menu.role && (
+                  <span className="text-gray-400 ml-2 text-xs font-medium">
+                    ({menu.role})
+                  </span>
                 )}
                 {!menu.isActive && (
                   <span className="text-red-500 ml-2 text-xs font-medium">
@@ -185,6 +194,7 @@ export default function Menus() {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nome */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   Nome do Menu *
@@ -197,6 +207,7 @@ export default function Menus() {
                 />
               </div>
 
+              {/* Path */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   Path (rota)
@@ -209,6 +220,7 @@ export default function Menus() {
                 />
               </div>
 
+              {/* Ícone */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   Ícone
@@ -227,6 +239,7 @@ export default function Menus() {
                 </select>
               </div>
 
+              {/* Menu Pai */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">
                   Menu Pai
@@ -248,8 +261,25 @@ export default function Menus() {
                     ))}
                 </select>
               </div>
+
+              {/* Role */}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-600">
+                  Role (Quem pode ver)
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="border border-gray-300 rounded-lg w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Todos</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">Usuário</option>
+                </select>
+              </div>
             </div>
 
+            {/* Ativo */}
             <div className="mt-4 flex items-center gap-3">
               <input
                 type="checkbox"
@@ -260,6 +290,7 @@ export default function Menus() {
               <span className="text-gray-700 text-sm">Ativo</span>
             </div>
 
+            {/* Botões */}
             <div className="mt-6 flex gap-3">
               <button
                 onClick={handleSave}

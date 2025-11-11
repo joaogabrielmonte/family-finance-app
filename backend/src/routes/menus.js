@@ -1,28 +1,45 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticate } from '../middlewares/auth.js'; // 🔒 middleware JWT (ver abaixo)
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// GET /menus → lista todos os menus ativos com submenus
-router.get('/', async (req, res) => {
+/**
+ * ✅ GET /menus → lista menus ativos conforme o role do usuário logado
+ */
+router.get('/', authenticate, async (req, res) => {
   try {
+    const userRole = req.user?.role || 'user'; // padrão: usuário comum
+
     const menus = await prisma.menu.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        OR: [
+          { role: null },        // público
+          { role: userRole },    // compatível com role do usuário
+        ],
+      },
       include: { submenus: true },
       orderBy: { orderIndex: 'asc' },
     });
+
     res.json(menus);
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao buscar menus:', err);
     res.status(500).json({ error: 'Erro ao buscar menus' });
   }
 });
 
-// POST /menus → criar menu
-router.post('/', async (req, res) => {
-  const { name, path, icon, role, parentId, isActive, orderIndex } = req.body;
+/**
+ * 🔐 POST /menus → criar menu (somente admin)
+ */
+router.post('/', authenticate, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
 
+  const { name, path, icon, role, parentId, isActive, orderIndex } = req.body;
   const parentIdInt =
     parentId !== undefined && parentId !== null && !isNaN(parseInt(parentId))
       ? parseInt(parentId)
@@ -47,15 +64,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /menus/:id → atualizar menu
-router.put('/:id', async (req, res) => {
+/**
+ * 🔐 PUT /menus/:id → atualizar menu (somente admin)
+ */
+router.put('/:id', authenticate, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+
   const { id } = req.params;
   const { name, path, icon, role, parentId, isActive, orderIndex } = req.body;
 
-  let parentIdInt = null;
-  if (parentId !== undefined && parentId !== null && !isNaN(parseInt(parentId))) {
-    parentIdInt = parseInt(parentId);
-  }
+  const parentIdInt =
+    parentId !== undefined && parentId !== null && !isNaN(parseInt(parentId))
+      ? parseInt(parentId)
+      : null;
 
   try {
     const menu = await prisma.menu.update({
@@ -70,7 +93,6 @@ router.put('/:id', async (req, res) => {
         orderIndex: orderIndex ?? 0,
       },
     });
-
     res.json(menu);
   } catch (err) {
     console.error('Erro ao atualizar menu:', err);
@@ -78,8 +100,14 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /menus/:id → excluir menu
-router.delete('/:id', async (req, res) => {
+/**
+ * 🔐 DELETE /menus/:id → excluir menu (somente admin)
+ */
+router.delete('/:id', authenticate, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+
   const { id } = req.params;
   try {
     await prisma.menu.delete({ where: { id: parseInt(id) } });
