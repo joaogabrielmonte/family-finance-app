@@ -13,12 +13,13 @@ import Goals from "./pages/goals/index";
 import Reports from "./pages/reports/reports";
 import Events from "./pages/Events/events";
 import FamilyMembers from "./pages/family/family";
+import LandingPage from "./pages/LandingPage";
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+       <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />

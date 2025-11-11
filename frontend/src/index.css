@@ -7,3 +7,9 @@
     margin-top: 4rem; /* distância suficiente pro botão flutuante */
   }
 }
+
+body {
+  background-image: url('../public/images/texture-blue.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
