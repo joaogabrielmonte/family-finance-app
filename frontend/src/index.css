@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (max-width: 768px) {
+  main {
+    margin-top: 4rem; /* distância suficiente pro botão flutuante */
+  }
+}

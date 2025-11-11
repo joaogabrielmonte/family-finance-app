@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+
+    <!-- 🔹 Metadados -->
+    <meta name="description" content="Finanças Family — Sistema completo de gestão financeira familiar" />
+    <meta name="author" content="Finanças Family" />
+    <meta name="keywords" content="finanças, controle financeiro, gastos, orçamentos, economia familiar" />
+
+    <!-- 🔹 Open Graph (para compartilhamento em redes sociais) -->
+    <meta property="og:title" content="Finanças Family" />
+    <meta property="og:description" content="Organize suas finanças com praticidade e segurança." />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://financas-family.com" />
+
+    <!-- 🔹 Ícones e Manifest -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- 🔹 Título dinâmico -->
+    <title>Finanças Family</title>
+
+    <!-- 🔹 Tema dinâmico aplicado via localStorage -->
+    <script>
+      // Lê a cor salva nas configurações
+      const themeColor = localStorage.getItem('themeColor') || '#2563eb';
+      document.documentElement.style.setProperty('--theme-color', themeColor);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', themeColor);
+    </script>
+
+    <!-- 🔹 Estilo base do tema -->
+    <style>
+      :root {
+        --theme-color: #2563eb;
+      }
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+          Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: #f9fafb;
+        color: #111827;
+      }
+      ::selection {
+        background: var(--theme-color);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Você precisa ativar o JavaScript para rodar este aplicativo.</noscript>
+    <div id="root"></div>
+
+    <!-- Mensagem caso carregue offline -->
+    <div id="offline" style="display:none; text-align:center; padding:20px;">
+      <p>⚠️ Você está offline. Algumas funcionalidades podem não funcionar.</p>
+    </div>
+
+    <script>
+      // Exibe aviso caso esteja offline
+      window.addEventListener('offline', () => {
+        document.getElementById('offline').style.display = 'block';
+      });
+      window.addEventListener('online', () => {
+        document.getElementById('offline').style.display = 'none';
+      });
+    </script>
+  </body>
+</html>
