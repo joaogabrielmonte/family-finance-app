@@ -18,13 +18,14 @@ const app = express();
 
 app.use(cors({
   origin: [
-    "https://family-finance-lyart.vercel.app", // frontend (Vercel)
-    "http://localhost:3000"                    // ambiente local
+    "https://family-finance-lyart.vercel.app",
+    "http://localhost:3000"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
   credentials: true
 }));
+
 app.use(express.json());
 
 // Rotas
@@ -44,5 +45,5 @@ app.get("/", (req, res) => {
   res.send("API Online 🚀 (rodando na Vercel)");
 });
 
-// Exportar o app em vez de app.listen()
+// Apenas exporta
 export default app;
