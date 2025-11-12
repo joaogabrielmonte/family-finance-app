@@ -1,6 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticate } from '../middlewares/auth.js'; // 🔒 middleware JWT (ver abaixo)
+import { authenticateToken } from '../middleware/auth.js'; // 🔒 middleware JWT (ver abaixo)
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 /**
  * ✅ GET /menus → lista menus ativos conforme o role do usuário logado
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const userRole = req.user?.role || 'user'; // padrão: usuário comum
 
@@ -34,7 +34,7 @@ router.get('/', authenticate, async (req, res) => {
 /**
  * 🔐 POST /menus → criar menu (somente admin)
  */
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Acesso negado' });
   }
@@ -67,7 +67,7 @@ router.post('/', authenticate, async (req, res) => {
 /**
  * 🔐 PUT /menus/:id → atualizar menu (somente admin)
  */
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Acesso negado' });
   }
@@ -103,7 +103,7 @@ router.put('/:id', authenticate, async (req, res) => {
 /**
  * 🔐 DELETE /menus/:id → excluir menu (somente admin)
  */
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Acesso negado' });
   }
