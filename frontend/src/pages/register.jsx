@@ -1,27 +1,57 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import '../index.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../index.css";
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // ✅ estado de loading
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true); // 🔥 ativa loading
+    setLoading(true);
+
+    // 🔹 Validação simples no front
+    if (!name || !email || !password) {
+      toast.warning("Preencha todos os campos!");
+      setLoading(false);
+      return;
+    }
+
+    // 🔹 Validação extra de senha no front
+    if (
+      password.length < 8 ||
+      !/\d/.test(password) ||
+      !/[A-Za-z]/.test(password)
+    ) {
+      toast.warning(
+        "A senha deve ter ao menos 8 caracteres, com letras e números."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // 🔹 Validação básica de formato de e-mail (cliente)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.warning("Digite um e-mail válido.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      await api.post('/auth/register', { name, email, password });
-      navigate('/login');
+      await api.post("/auth/register", { name, email, password });
+      toast.success("Conta criada com sucesso! Redirecionando...");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Erro ao registrar');
+      toast.error(err.response?.data?.message || "Erro ao registrar.");
     } finally {
-      setLoading(false); // 🔥 desativa loading
+      setLoading(false);
     }
   };
 
@@ -29,7 +59,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative">
-
       {/* Overlay de Loading */}
       {loading && (
         <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
@@ -40,9 +69,9 @@ export default function Register() {
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img 
-            src="/images/logo2.png" 
-            alt="Kingslytic Logo" 
+          <img
+            src="/images/logo2.png"
+            alt="Kingslytic Logo"
             className="h-20 w-auto object-contain"
           />
         </div>
@@ -54,12 +83,6 @@ export default function Register() {
           Preencha os dados para começar
         </p>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -69,7 +92,7 @@ export default function Register() {
               type="text"
               placeholder="Seu nome"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
@@ -83,7 +106,7 @@ export default function Register() {
               type="email"
               placeholder="seu@email.com"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
@@ -97,7 +120,7 @@ export default function Register() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
@@ -105,15 +128,24 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium shadow-lg hover:shadow-xl"
+            disabled={loading}
+            className={`w-full text-white py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition 
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
-            Criar Conta
+            {loading ? "Criando conta..." : "Criar Conta"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-gray-600">
-          Já tem conta?{' '}
-          <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+          Já tem conta?{" "}
+          <a
+            href="/login"
+            className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+          >
             Entrar
           </a>
         </p>
@@ -128,6 +160,9 @@ export default function Register() {
           </p>
         </div>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
     </div>
   );
 }

@@ -3,13 +3,7 @@ import api from "../../services/api";
 import Menu from "../../components/menu";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  UserPlus,
-  Edit,
-  Trash2,
-  Shield,
-  XCircle,
-} from "lucide-react";
+import { UserPlus, Edit, Trash2, Shield, XCircle } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -17,6 +11,7 @@ export default function Users() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [editId, setEditId] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -44,18 +39,14 @@ export default function Users() {
     e.preventDefault();
     try {
       if (editId) {
-        await api.put(
-          `/admin/users/${editId}`,
-          form,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.put(`/admin/users/${editId}`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Usuário atualizado com sucesso!");
       } else {
-        await api.post(
-          "/admin/users",
-          form,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.post("/admin/users", form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Usuário criado com sucesso!");
       }
 
@@ -83,16 +74,19 @@ export default function Users() {
   };
 
   const handleConfirmDelete = async () => {
+    setLoadingDelete(true); // 🔹 Mostra loading
     try {
-      await api.delete(`/admin/users/${deleteId}`, {
+      const response = await api.delete(`/admin/users/${deleteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Usuário excluído!");
+
+      toast.success(response.data.message || "Usuário excluído com sucesso!");
       fetchUsers();
     } catch (err) {
       toast.error("Erro ao excluir usuário");
       console.error(err);
     } finally {
+      setLoadingDelete(false); // 🔹 Some o loading
       setShowDeleteModal(false);
       setDeleteId(null);
     }
@@ -149,10 +143,7 @@ export default function Users() {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {users.map((u) => (
-                <tr
-                  key={u.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
+                <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-3">{u.name}</td>
                   <td className="p-3">{u.email}</td>
                   <td className="p-3 capitalize">{u.role}</td>
@@ -218,9 +209,7 @@ export default function Users() {
                 />
                 <input
                   type="password"
-                  placeholder={
-                    editId ? "Nova senha (opcional)" : "Senha"
-                  }
+                  placeholder={editId ? "Nova senha (opcional)" : "Senha"}
                   value={form.password}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
@@ -262,6 +251,14 @@ export default function Users() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Overlay de carregamento */}
+        {loadingDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center z-50">
+            <div className="w-12 h-12 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+            <p className="text-white mt-4 font-medium">Excluindo usuário...</p>
           </div>
         )}
       </main>
