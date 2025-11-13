@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/finances/dashboard";
@@ -15,10 +15,21 @@ import FamilyMembers from "./pages/family/family";
 import LandingPage from "./pages/LandingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./components/NotFound";
+import Chatbot from "./pages/chatbot/Chatbot";
+import ChatWidget from "./pages/chatbot/chatWidget";
 
-export default function App() {
+// ---- WRAPPER PARA EXIBIR O CHATWIDGET ----
+function AppWrapper() {
+  const location = useLocation();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+
+  // Mostrar o widget apenas se não estivermos na página de chat
+  const showChatWidget = location.pathname !== "/chat";
+
   return (
-    <Router>
+    <>
+      {showChatWidget && user && token && <ChatWidget user={user} token={token} />}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -114,10 +125,26 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Rota catch-all para 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+    </>
+  );
+}
+
+// ---- APP PRINCIPAL ----
+export default function App() {
+  return (
+    <Router>
+      <AppWrapper />
     </Router>
   );
 }

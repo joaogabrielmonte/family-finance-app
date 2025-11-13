@@ -13,6 +13,7 @@ import goalRoutes from "../src/routes/goals.js";
 import reportsRouter from "../src/routes/reports.js";
 import Events from "../src/routes/events.js";
 import FamilyMembers from "../src/routes/family.js";
+import chatRoutes from "../src/routes/chat.js";
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use("/goals", goalRoutes);
 app.use("/reports", reportsRouter);
 app.use("/events", Events);
 app.use("/family", FamilyMembers);
-
+app.use("/chat", chatRoutes);
 // Rota base
 app.get("/", (req, res) => {
   res.send("API Online 🚀 (rodando na Vercel)");

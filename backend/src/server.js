@@ -11,6 +11,7 @@ import reportsRouter from "./routes/reports.js";
 import Events from './routes/events.js';
 import FamilyMembers from './routes/family.js';
 import 'dotenv/config';
+import chatRoutes from "./routes/chat.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/goals', goalRoutes);
 app.use('/reports', reportsRouter);
 app.use('/events', Events);
 app.use('/family', FamilyMembers);
+app.use('/chat', chatRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Online 🚀');

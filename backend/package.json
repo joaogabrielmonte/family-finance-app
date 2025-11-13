@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node api/server.js",
     "build": "npx prisma generate",
-    "vercel-build": "npx prisma generate"
+    "vercel-build": "npx prisma generate",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -23,5 +24,10 @@
   "prisma": {
     "seed": "node prisma/seed.js"
   },
-  "proxy": "http://localhost:3333"
+  "proxy": "http://localhost:3333",
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4",
+    "cross-env": "^7.0.3"
+  }
 }

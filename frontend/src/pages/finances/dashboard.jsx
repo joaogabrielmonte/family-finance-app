@@ -16,6 +16,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+
 const formatCurrency = (value) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [selectedBank, setSelectedBank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
+  
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
