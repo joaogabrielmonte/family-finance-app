@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ adicionado useLocation
 import api from "../services/api";
 import * as LucideIcons from "lucide-react";
 import {
@@ -21,6 +21,7 @@ export default function Sidebar({ user }) {
   );
 
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ pega a rota atual
 
   // Detecta se é mobile
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function Sidebar({ user }) {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`fixed z-50 p-2 rounded-lg text-white hover:opacity-90 transition-all shadow-lg
-      ${isOpen ? "left-56 top-4" : "left-4 top-4"}`}
+            ${isOpen ? "left-56 top-4" : "left-4 top-4"}`}
           style={{ backgroundColor: themeColor }}
           aria-label="Abrir menu"
         >
@@ -102,7 +103,6 @@ export default function Sidebar({ user }) {
               ? "w-64"
               : "w-20"
           }
-
           ${isMobile ? "shadow-2xl z-40" : "z-0"}
         `}
         style={{
@@ -136,6 +136,7 @@ export default function Sidebar({ user }) {
               if (item.role && item.role !== user?.role) return null;
               const Icon = getIconComponent(item.icon);
               const hasSubmenus = item.submenus && item.submenus.length > 0;
+              const isActive = location.pathname === item.path; // ✅ verifica se o menu está ativo
 
               return (
                 <div key={index}>
@@ -145,14 +146,16 @@ export default function Sidebar({ user }) {
                         ? setOpenSubMenu(openSubMenu === index ? null : index)
                         : handleNavigation(item.path)
                     }
-                    className={`flex items-center justify-between w-full px-4 py-2 hover:bg-black/20 transition-all ${
-                      openSubMenu === index ? "bg-black/20" : ""
-                    }`}
+                    className={`flex items-center justify-between w-full px-4 py-2 transition-all
+                      ${
+                        isActive
+                          ? "bg-black/30 text-white font-semibold" // ✅ ativo fixo
+                          : "hover:bg-black/20"
+                      }
+                    `}
                   >
                     <div className="flex items-center">
-                      {Icon && (
-                        <Icon className="mr-3 flex-shrink-0" size={18} />
-                      )}
+                      {Icon && <Icon className="mr-3 flex-shrink-0" size={18} />}
                       {isOpen && <span>{item.name}</span>}
                     </div>
                     {isOpen && hasSubmenus && (
@@ -177,15 +180,21 @@ export default function Sidebar({ user }) {
                       <div className="pl-10 space-y-1 py-1">
                         {item.submenus.map((sub, i) => {
                           const SubIcon = getIconComponent(sub.icon);
+                          const isSubActive = location.pathname === sub.path; // ✅ submenu ativo
+
                           return (
                             <button
                               key={i}
                               onClick={() => handleNavigation(sub.path)}
-                              className="flex items-center w-full px-3 py-2 text-sm text-gray-300 hover:bg-black/20 rounded transition"
+                              className={`flex items-center w-full px-3 py-2 text-sm rounded transition
+                                ${
+                                  isSubActive
+                                    ? "bg-black/30 text-white font-semibold" // submenu ativo
+                                    : "text-gray-300 hover:bg-black/20"
+                                }
+                              `}
                             >
-                              {SubIcon && (
-                                <SubIcon className="mr-2" size={16} />
-                              )}
+                              {SubIcon && <SubIcon className="mr-2" size={16} />}
                               {sub.name}
                             </button>
                           );
