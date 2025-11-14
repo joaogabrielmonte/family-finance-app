@@ -3,6 +3,9 @@ import { Bot, SendHorizonal, X } from "lucide-react";
 import api from "../../services/api";
 
 export default function ChatWidget({ user, token }) {
+  // ❌ Se não tiver usuário ou token, não renderiza nada
+  if (!user || !token) return null;
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Olá! Sou seu assistente financeiro. Como posso ajudar hoje?" },
@@ -11,7 +14,6 @@ export default function ChatWidget({ user, token }) {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef();
 
-  // Auto scroll
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
@@ -26,15 +28,17 @@ export default function ChatWidget({ user, token }) {
     setLoading(true);
 
     try {
+      // ❌ NÃO enviar userId do frontend
       const res = await api.post(
         "/chat/ai",
-        { message: input, userId: user.id },
+        { message: input },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const botReply = res.data.reply || "Desculpe, não consegui entender.";
       setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
     } catch (error) {
+      console.error(error);
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "❌ Erro ao se comunicar com o assistente." },
@@ -46,7 +50,6 @@ export default function ChatWidget({ user, token }) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Botão flutuante */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -56,10 +59,8 @@ export default function ChatWidget({ user, token }) {
         </button>
       )}
 
-      {/* Janela de chat */}
       {open && (
         <div className="w-80 h-[400px] bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
-          {/* Header */}
           <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
             <span className="font-bold flex items-center gap-2">
               <Bot className="w-5 h-5" /> Assistente Financeiro
@@ -69,7 +70,6 @@ export default function ChatWidget({ user, token }) {
             </button>
           </div>
 
-          {/* Mensagens */}
           <div
             ref={scrollRef}
             className="flex-1 p-3 overflow-y-auto space-y-2 bg-slate-50"
@@ -93,11 +93,7 @@ export default function ChatWidget({ user, token }) {
             {loading && <p className="text-sm text-slate-500 italic animate-pulse">Pensando...</p>}
           </div>
 
-          {/* Input */}
-          <form
-            onSubmit={sendMessage}
-            className="flex gap-2 p-2 border-t border-slate-200"
-          >
+          <form onSubmit={sendMessage} className="flex gap-2 p-2 border-t border-slate-200">
             <input
               type="text"
               value={input}
