@@ -11,30 +11,7 @@ const ABSTRACT_API_KEY =
   process.env.ABSTRACT_API_KEY || "38f56175656d4a9bb34763f7ff05ea92";
 
 async function validarEmail(email) {
-  try {
-    const response = await axios.get(
-      `https://emailreputation.abstractapi.com/v1/?api_key=${ABSTRACT_API_KEY}&email=${email}`
-    );
-
-    const data = response.data;
-
-    console.log("📧 Resultado API:", JSON.stringify(data, null, 2));
-
-    // 1️⃣ Formato inválido
-    if (!data.is_valid_format?.value) return false;
-
-    // 2️⃣ Bloqueia domínios temporários
-    if (data.is_disposable_email?.value) return false;
-
-    // 3️⃣ Verifica se domínio possui MX — ESSENCIAL!
-    if (data.is_mx_found === false) return false;
-
-    return true;
-
-  } catch (error) {
-    console.error("❌ Erro ao validar e-mail:", error.message);
-    return true; // fallback: NÃO bloquear usuários reais
-  }
+  return validator.isEmail(email);
 }
 
 router.post("/register", async (req, res) => {
