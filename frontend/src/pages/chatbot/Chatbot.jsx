@@ -8,7 +8,8 @@ export default function Chatbot() {
   const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
 
-  const { refreshFinance } = useContext(FinanceContext); // função para atualizar dashboard
+const finance = useContext(FinanceContext);
+const refreshFinance = finance?.refreshFinance || (() => {});// função para atualizar dashboard
 
   const [messages, setMessages] = useState([
     {
