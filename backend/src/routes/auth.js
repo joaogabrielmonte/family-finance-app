@@ -15,6 +15,7 @@ async function validarEmail(email) {
     const response = await axios.get(
       `https://emailreputation.abstractapi.com/v1/?api_key=${ABSTRACT_API_KEY}&email=${email}`
     );
+
     const data = response.data;
 
     console.log("📧 Resultado API:", JSON.stringify(data, null, 2));
@@ -25,24 +26,16 @@ async function validarEmail(email) {
     // 2️⃣ Bloqueia domínios temporários
     if (data.is_disposable_email?.value) return false;
 
-    // 3️⃣ SMTP inválido ou desconhecido
-    if (data.is_smtp_valid?.value === false || data.is_smtp_valid?.value === null)
-      return false;
-
-    // 4️⃣ Entregabilidade incerta ou ruim
-    if (["UNKNOWN", "UNDELIVERABLE", null].includes(data.deliverability))
-      return false;
-
-    // 5️⃣ Domínio genérico sem verificação MX
+    // 3️⃣ Verifica se domínio possui MX — ESSENCIAL!
     if (data.is_mx_found === false) return false;
 
     return true;
+
   } catch (error) {
     console.error("❌ Erro ao validar e-mail:", error.message);
-    return false; // fallback seguro
+    return true; // fallback: NÃO bloquear usuários reais
   }
 }
-
 
 router.post("/register", async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -57,11 +50,12 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "E-mail inválido." });
 
     // 3️⃣ Força mínima da senha
-    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password))
+    if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
       return res.status(400).json({
         message:
           "A senha deve ter pelo menos 8 caracteres, incluindo letras e números.",
       });
+    }
     // 4️⃣ E-mail já cadastrado
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser)
@@ -139,6 +133,5 @@ router.post("/login", async (req, res) => {
     user: { id: user.id, email: user.email, name: user.name, role: user.role },
   });
 });
-
 
 export default router;
