@@ -3,9 +3,6 @@ import { Bot, SendHorizonal, X } from "lucide-react";
 import api from "../../services/api";
 
 export default function ChatWidget({ user, token }) {
-  // ❌ Se não tiver usuário ou token, não renderiza nada
-  if (!user || !token) return null;
-
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Olá! Sou seu assistente financeiro. Como posso ajudar hoje?" },
@@ -15,7 +12,9 @@ export default function ChatWidget({ user, token }) {
   const scrollRef = useRef();
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [messages, loading]);
 
   const sendMessage = async (e) => {
@@ -28,7 +27,6 @@ export default function ChatWidget({ user, token }) {
     setLoading(true);
 
     try {
-      // ❌ NÃO enviar userId do frontend
       const res = await api.post(
         "/chat/ai",
         { message: input },
@@ -47,6 +45,15 @@ export default function ChatWidget({ user, token }) {
       setLoading(false);
     }
   };
+
+  // ✅ Agora verificamos aqui, SEM impedir hooks
+  if (!user || !token) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        {/* Não renderiza nada, mas não quebra hooks */}
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -70,10 +77,7 @@ export default function ChatWidget({ user, token }) {
             </button>
           </div>
 
-          <div
-            ref={scrollRef}
-            className="flex-1 p-3 overflow-y-auto space-y-2 bg-slate-50"
-          >
+          <div ref={scrollRef} className="flex-1 p-3 overflow-y-auto space-y-2 bg-slate-50">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -90,6 +94,7 @@ export default function ChatWidget({ user, token }) {
                 </div>
               </div>
             ))}
+
             {loading && <p className="text-sm text-slate-500 italic animate-pulse">Pensando...</p>}
           </div>
 
